@@ -1,24 +1,45 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useState, useEffect} from 'react';
+import Recipe from './components/Recipe';
+import Axios from 'axios';
 import './App.css';
 
 function App() {
+
+    const APP_ID = 'f400191d';
+    const APP_KEY = '58118efae4fc0471efc405dc9088cf3e';
+
+    const [recipes, setRecipes] = useState([]);
+
+    const [recipeState, setRecipeState] = useState('');
+    const [submitted, setSubmitted] = useState('chicken');
+
+    const onChangeHandler = e => setRecipeState(e.target.value);
+
+    const submitHandler = e => {
+        e.preventDefault();
+        setSubmitted(recipeState);
+        setRecipeState('');
+    };
+
+    useEffect( () => {
+        Axios.get(`https://api.edamam.com/search?q=${submitted}&app_id=${APP_ID}&app_key=${APP_KEY}`)
+        .then( response => {
+            setRecipes(response.data.hits)
+        } )
+        .catch( error => {
+            console.log(error)
+        })
+    }
+    , [submitted] )
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <Recipe     
+            submitHandler={submitHandler} 
+            onChangeHandler={onChangeHandler} 
+            recipeState={recipeState} 
+            recipeData={recipes}
+        />
     </div>
   );
 }
